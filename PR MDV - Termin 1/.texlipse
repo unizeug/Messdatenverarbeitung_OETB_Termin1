@@ -1,0 +1,13 @@
+#TeXlipse project settings
+#Thu Apr 19 11:20:25 CEST 2012
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=PR MDV - Termin 1.tex
+outputFile=PR MDV - Termin 1.pdf
+langSpell=en
+markDer=true
+srcDir=
