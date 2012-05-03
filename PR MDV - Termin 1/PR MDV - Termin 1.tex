@@ -110,15 +110,53 @@ main (void)
 
 \section{Versuch}
 \begin{quote}
-	
-\end{quote}
+	Im Praxisteil soll nun der Analog-Digital-Umwandler (ADU) zur Erfassung von Messwerten genutzt werden. Dafür soll es möglich sein die Samplerate und die Dauer der Messung einzustellen. Der Free-Running-Mode aus dem Theorieteil ist hierfür nicht geeignet.\\ Statt dessen soll der ADU von einem Timer getriggert werden. Dieser kann frei konfiguriert werden und (nahezu) beliebige Abtastraten zur Verfügung stellen. Um die Messdaten zu speichern und auszulesen muss eine Verbindung zu einem PC bestehen. Die nötige Software hierfür ist vorgegeben.
+\subsection{Vorgehensweise}
+Das Programm wird in mehrere Funktionen aufgeteilt und einzeln implementiert.\\\\\\
+\begin{tabular}[ht]{|l|c|}
+  \hline
+  Function & Anwendung\\
+  \hline\hline
+  adcInit() & initialisiert den ADU\\
+  adcStart() & startet eine neue Messung\\
+  adcIsRunning() & gibt an ob gerade eine Messung vorgenommen wird\\
+  \hline
+\end{tabular}\\\\\\
+Zusätzlich sind noch folgende Interruptroutinen zu programmieren.\\\\\\
+\begin{tabular}[ht]{|l|c|}
+  \hline
+  Interruptvektor & Funktion\\
+  \hline\hline
+ ADC & ließt einen Abtastwert aus und speichert ihn\\
+  \hline
+\end{tabular}\\\\\\
+\subsection{Implementierung: adcInit()}
+Die Funktion adcInit() soll den ADU initialisieren. Als Referenzspannung soll die $\mu C$ interne $2,56V$ Bandgapreferenz genutzt werden. Der ADU wird wie in den Vorbereitungsaufgaben mit einem 32tel des CPU-Taktes betrieben. Gemessen wird an Kanal 0.\\ Um beliebige Abtastraten einstellen zu können, soll eine AD-Umsetzung diesmal von einem Timer getriggert werden. In dieser Funktion wird auch das AD-Wandlung-komplett-Interrupt aktiviert.
+\subsection{Implementierung: adcStart()}
+Diese Funktion soll eine neue Messung starten. Dafür werden (indirekt) die Samplerate und die Anzahl der benötigten Messwerte übergeben. Die Anzahl der Messwerte wird in einer globalen Variable gespeichert und somit auch anderen Funktionen zur Verfuegung gestellt.Außerdem kann optional noch auf die steigende oder fallende Flanke getriggert werden. Hierfür kann auch noch ein Triggerlevel übergeben werden.\\ Die Samplerate wird nicht direkt übergeben. Der Timer zählt die Impulse des CPU-Taktes. Auf diese Weise lässt sich die Zeit messen. Ist eine gewisse Zeit überschritten, wird abgetastet und der Timer wird resettet. Dies ist der Clear-on-Compare-Modus (CTC) des Timers.\\ Die Samplerate wurde nun vorher in die Anzahl von Impulsen, die der Timer zwischen zwei Triggerimpulsen warten soll, umgerechnet. Die Anzahl an Impulsen ist der RATECODE und berechnet sich wie folgt. 
+\begin{align}
+RATECODE = \frac{F_{CPU}}{SampleRate}-1 
+\end{align}
+Der Wert RATECODE wird dann an das Output-Compare-Register A und B übergeben. Dies ist nötig, da der ADU nur vom Output-Compare-Register B getriggert, der Timer im CTC-Mode aber nur vom Output-Compare-Register A resettet werden kann.  
+\subsection{Interruptroutinen}
+Die Interrupt-Routine ADC wird aufgerufen, sobald der ADU eine Wandlung beendet hat. Dann wird der Messwert ausgelesen, ein Offset von 512 abgezogen und gespeichert. Dadurch ergibt sich dann ein Wertebereich von -512 bis +511. Zusätzlich wird bei jedem Aufruf von ADC die globale Variable mit der Anzahl der benötigten Samples um eins reduziert. Ist die Anzahl der Samples auf 0, so ist die Messung abgeschlossen und es werden keine weiteren Messwerte aufgenommen.
+\subsection{Triggermodus und Triggerlevel}
+Manchmal will man die Messung bei einem gewissen Initialwert starten. Einfach nur zu hoffen zufällig genau zum richtigen Zeitpunkt zu starten, ist keine gute Idee. In adcStart() kann festgelegt werden, auf welche Signalverläufe die Messung getriggert werden soll.\\
+Um steigende oder fallende Flanke auf dem richtigen Level zu erkennen, wird in der ADC-Routine zunächst der vorletzte Messwert gespeichert. Soll die Messung auf die steigende Flanke erfolgen, wird überprüft, ob der aktuelle Messwert größer als  der Triggerlevel ist. Ist dies der Fall wird überprüft, ob der vorletzte Messwert kleiner war als der Triggerlevel. Wenn ja, wurde eine steigende Flanke detektiert. Erst ab diesem Zeitpunkt werden die Messwerte des ADU tatsächlich gespeichert.
+Das Triggern auf die Fallende flanke funktioniert äquivalent zur steigenden Flanke.
+\subsection{Implementierung: adcIsRunning()}
+Diese Funktion gibt zurück, ob gerade eine Messung erfolgt oder nicht. Dazu wird einfach die Anzahl der benötigten Samples überprüft. Werden noch Samples benötigt, ist noch eine Messung in Gang.
 
 %--------------------------------------------------------------------
 %--------------------------------------------------------------------
 
-\section{Ergebnisse}
-\begin{quote}
-	
+\section{Listing}
+\lstinputlisting[
+        caption={Quellcode},
+        label=lst:c]
+        {./adc.c}
+\end{document}
+  
 \end{quote}
 
 %--------------------------------------------------------------------
