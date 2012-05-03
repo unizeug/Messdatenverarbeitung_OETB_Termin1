@@ -100,7 +100,17 @@ main (void)
         Abtastraten von $\frac{f_{clk}}{2}, \frac{f_{clk}}{4}, \frac{f_{clk}}{8}, \frac{f_{clk}}{16},
         \frac{f_{clk}}{64}$ und $\frac{f_{clk}}{128}$ einstellen.\\
         Für eine Umsetzung benötigt der ADU-jedoch $13$ solcher Takte und daher ist die effective Abtstrate $f_{sample}
-        = \frac{f_{clk}}{13 \cdot   32}$
+        = \frac{f_{clk}}{13 \cdot   32}$.\\
+        Im Datenblatt ist angegeben, dass ein ADU, der eine kleinere Auflösung
+        als 10 Bit benötigt ( in unserem Fall arbeiten wir mit 8 Bit) mit einer
+        Clock arbeiten, der eine Frequenz zwischen $50$ und $200 kHz$ hat. Wenn
+        wir von $200 kHz$ ausgehen würde die eingestellte Abtastrate mit
+        $\frac{200 kHz}{13 \cdot 32} \approx 480 Hz$ betragen.\\
+        
+        Die Clock-Frequenz kann auch bis zu $1 MHz$ hochgehen, falls eine höhere
+        Abtastrate erforderlich ist.
+        
+        
     \end{quote}
 
 \end{quote}
